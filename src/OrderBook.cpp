@@ -1,85 +1,11 @@
-#include "OrderBook.hpp"
+#include "OrderBook.h"
 
 #include <algorithm>
-#include <fmt/core.h>
 #include <iostream>
 #include <numeric>
 #include <tuple>
 #include <variant>
 
-// OrderbookPriceLevelInfos implementation
-OrderbookPriceLevelInfos::OrderbookPriceLevelInfos(const PriceLevelInfos &bids,
-                                                   const PriceLevelInfos &asks)
-    : bids_{bids}, asks_{asks} {}
-
-const PriceLevelInfos &OrderbookPriceLevelInfos::GetBids() const {
-  return bids_;
-}
-
-const PriceLevelInfos &OrderbookPriceLevelInfos::GetAsks() const {
-  return asks_;
-}
-
-// Order implementation
-Order::Order(OrderType orderType, OrderId orderId, Side side, Price price,
-             Quantity quantity)
-    : orderType_{orderType}, orderId_{orderId}, side_{side}, price_{price},
-      initialQuantity_{quantity}, remainingQuantity_{quantity} {}
-
-OrderId Order::GetOrderId() const { return orderId_; }
-
-Side Order::GetSide() const { return side_; }
-
-Price Order::GetPrice() const { return price_; }
-
-OrderType Order::GetOrderType() const { return orderType_; }
-
-Quantity Order::GetInitialQuantity() const { return initialQuantity_; }
-
-Quantity Order::GetRemainingQuantity() const { return remainingQuantity_; }
-
-Quantity Order::GetFilledQuantity() const {
-  return GetInitialQuantity() - GetRemainingQuantity();
-}
-
-void Order::Fill(Quantity quantity) {
-  if (quantity > GetRemainingQuantity())
-    throw std::logic_error(fmt::format(
-        "Order ({}) cannot be filled for more than its remaining quantity.",
-        GetOrderId()));
-
-  remainingQuantity_ -= quantity;
-}
-
-bool Order::IsFilled() const { return GetRemainingQuantity() == 0; }
-
-// OrderModify implementation
-OrderModify::OrderModify(OrderId orderId, Price price, Quantity quantity)
-    : orderId_{orderId}, price_{price}, quantity_{quantity} {}
-
-OrderId OrderModify::GetOrderId() const { return orderId_; }
-
-Price OrderModify::GetPrice() const { return price_; }
-
-Quantity OrderModify::GetQuantity() const { return quantity_; }
-
-OrderPointer OrderModify::ToOrderPointer(OrderType type, Side side) const {
-  return std::make_shared<Order>(type, GetOrderId(), side, GetPrice(),
-                                 GetQuantity());
-}
-
-// Trade implementation
-Trade::Trade(const TradeInfo &tradeBid, const TradeInfo &tradeAsk,
-             Quantity quantity)
-    : tradeBid_{tradeBid}, tradeAsk_{tradeAsk}, quantity_{quantity} {}
-
-const TradeInfo &Trade::GetTradeBid() const { return tradeBid_; }
-
-const TradeInfo &Trade::GetTradeAsk() const { return tradeAsk_; }
-
-Quantity Trade::GetQuantity() const { return quantity_; }
-
-// Orderbook implementation
 Trades Orderbook::AddOrder(OrderPointer order) {
   if (orders_.contains(order->GetOrderId()))
     return {};
