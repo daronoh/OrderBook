@@ -1,20 +1,20 @@
 #pragma once
 
-#include "TradeInfo.h"
-
 class Trade {
 public:
-  Trade(const TradeInfo &tradeBid, const TradeInfo &tradeAsk, Quantity quantity)
-      : tradeBid_{tradeBid}, tradeAsk_{tradeAsk}, quantity_{quantity} {}
+  Trade(OrderId bidId, OrderId askId, Quantity quantity, Price price)
+      : bidId_{bidId}, askId_{askId}, quantity_{quantity}, price_{price} {}
 
-  const TradeInfo &GetTradeBid() const { return tradeBid_; }
-  const TradeInfo &GetTradeAsk() const { return tradeAsk_; }
+  OrderId GetBidId() const { return bidId_; }
+  OrderId GetAskId() const { return askId_; }
   Quantity GetQuantity() const { return quantity_; }
+  Price GetPrice() const { return price_; }
 
 private:
-  TradeInfo tradeBid_;
-  TradeInfo tradeAsk_;
+  OrderId bidId_;
+  OrderId askId_;
   Quantity quantity_;
+  Price price_;
 };
 
 using Trades = std::vector<Trade>;

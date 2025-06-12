@@ -1,14 +1,13 @@
 #pragma once
 
-#include <fmt/core.h>
 #include <list>
 #include <memory>
 
+#include "Constants.h"
 #include "OrderType.h"
 #include "Side.h"
 #include "Usings.h"
 
-// Order objects that make up the orderbook
 class Order {
 public:
   Order(OrderType orderType, OrderId orderId, Side side, Price price,
@@ -16,15 +15,20 @@ public:
       : orderType_{orderType}, orderId_{orderId}, side_{side}, price_{price},
         initialQuantity_{quantity}, remainingQuantity_{quantity} {}
 
+  Order(OrderId orderId, Side side, Quantity quantity)
+      : Order(OrderType::Market, orderId, side, Constants::InvalidPrice,
+              quantity) {}
+
   OrderId GetOrderId() const { return orderId_; }
   Side GetSide() const { return side_; }
   Price GetPrice() const { return price_; }
   OrderType GetOrderType() const { return orderType_; }
   Quantity GetInitialQuantity() const { return initialQuantity_; }
   Quantity GetRemainingQuantity() const { return remainingQuantity_; }
-	Quantity GetFilledQuantity() const;
+  Quantity GetFilledQuantity() const;
   bool IsFilled() const;
-	void Fill(Quantity quantity);
+  void Fill(Quantity quantity);
+	void ToFillAndKill(Price price);
 
 private:
   OrderType orderType_;

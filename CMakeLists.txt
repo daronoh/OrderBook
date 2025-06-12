@@ -5,8 +5,6 @@ project(OrderBook LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(fmt REQUIRED)
-
 # Explicitly list all source files
 set(ORDERBOOK_SOURCES
     src/OrderBook.cpp
@@ -21,8 +19,6 @@ add_library(OrderBook ${ORDERBOOK_SOURCES} ${HEADERS})
 
 # Make the 'include' folder visible to users of this library
 target_include_directories(OrderBook PUBLIC include)
-
-target_link_libraries(OrderBook fmt::fmt)
 
 # --- Add your executable ---
 add_executable(main_app src/main.cpp)
