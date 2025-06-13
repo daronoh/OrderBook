@@ -81,7 +81,7 @@ void Orderbook::CancelOrderInternal(OrderId orderId) {
   if (!orders_.contains(orderId))
     return;
 
-  const auto &[order, orderIter] = orders_.at(orderId);
+  const auto [order, orderIter] = orders_.at(orderId);
   orders_.erase(orderId);
 
   if (order->GetSide() == Side::Buy) {
@@ -98,6 +98,8 @@ void Orderbook::CancelOrderInternal(OrderId orderId) {
     if (askLevel.empty())
       asks_.erase(price);
   }
+
+  OnOrderCancelled(order);
 }
 
 Trades Orderbook::ModifyOrder(const OrderModify &order) {
@@ -268,19 +270,19 @@ Trades Orderbook::MatchOrders() {
         orders_.erase(ask->GetOrderId());
       }
 
-      if (levelBids.empty()) {
-        bids_.erase(bestBid); // entire level of bestBid is filled
-      }
-
-      if (levelAsks.empty()) {
-        asks_.erase(bestAsk); // entire level of bestAsk is filled
-      }
-
       trades.emplace_back(bid->GetOrderId(), ask->GetOrderId(), tradeQuantity,
                           ask->GetPrice()); // trade done at ask price
 
       OnOrderMatched(bid->GetPrice(), tradeQuantity, bid->IsFilled());
       OnOrderMatched(ask->GetPrice(), tradeQuantity, ask->IsFilled());
+    }
+
+    if (levelBids.empty()) {
+      bids_.erase(bestBid); // entire level of bestBid is filled
+    }
+
+    if (levelAsks.empty()) {
+      asks_.erase(bestAsk); // entire level of bestAsk is filled
     }
   }
 
@@ -289,14 +291,14 @@ Trades Orderbook::MatchOrders() {
     auto &[_, bids] = *bids_.begin();
     auto &order = bids.front();
     if (order->GetOrderType() == OrderType::FillAndKill)
-      CancelOrder(order->GetOrderId());
+      CancelOrderInternal(order->GetOrderId());
   }
 
   if (!asks_.empty()) {
     auto &[_, asks] = *asks_.begin();
     auto &order = asks.front();
     if (order->GetOrderType() == OrderType::FillAndKill)
-      CancelOrder(order->GetOrderId());
+      CancelOrderInternal(order->GetOrderId());
   }
 
   return trades;
