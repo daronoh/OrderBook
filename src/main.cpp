@@ -1,8 +1,10 @@
 #include <iostream>
 
 #include "OrderBook.h"
+#include "Profiler.h"
 
 int main() {
+  Profiler("main");
   Orderbook orderbook;
   OrderId orderId = 1;
   orderbook.AddOrder(std::make_shared<Order>(OrderType::GoodTillCancel, orderId,
