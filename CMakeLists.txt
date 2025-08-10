@@ -5,6 +5,27 @@ project(OrderBook LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Set default build type to Release if not specified
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+# Print build type for clarity
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
+# Optimization flags for the two build types we actually use
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native -mtune=native -ffast-math")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wextra -Wpedantic -fsanitize=address -fsanitize=undefined")
+
+# Link flags for debug builds (for sanitizers)
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-fsanitize=address -fsanitize=undefined")
+
+# Performance-specific flags for Release build
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "Enabling Link Time Optimization for Release build")
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)  # Modern way to enable LTO
+endif()
+
 
 # Explicitly list all source files
 set(ORDERBOOK_SOURCES
@@ -24,6 +45,10 @@ target_include_directories(OrderBook PUBLIC include)
 # --- Add your executable ---
 add_executable(main_app src/main.cpp)
 target_link_libraries(main_app PRIVATE OrderBook)
+
+# --- Add benchmark executable ---
+add_executable(benchmark benchmark.cpp)
+target_link_libraries(benchmark PRIVATE OrderBook)
 
 # --- Testing setup ---
 enable_testing()

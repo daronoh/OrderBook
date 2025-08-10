@@ -39,3 +39,6 @@ build/
 *.vscode/
 
 .clang-format
+
+build-debug/
+build-release/
